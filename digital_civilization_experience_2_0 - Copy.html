@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA Theme Color -->
+    <meta name="theme-color" content="#050510">
+    <title>Digital Civilization 2.0 | STIT Ad-Da'wah</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        space: { 900: '#050510', 800: '#0b0b1a', 700: '#15152b' },
+                        accent: { blue: '#3b82f6', cyan: '#06b6d4', gold: '#f59e0b', purple: '#8b5cf6', emerald: '#10b981' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Tone.js for Audio Synthesis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #050510; color: #f8fafc; overflow: hidden; user-select: none; }
+        h1, h2, h3, .font-poppins { font-family: 'Poppins', sans-serif; }
+        
+        /* Glassmorphism & Aurora */
+        .glass { background: rgba(15, 15, 35, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-gold { background: rgba(245, 158, 11, 0.08); backdrop-filter: blur(16px); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .aurora-bg {
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 50%), #050510;
+            background-size: 200% 200%;
+            animation: auroraShift 20s ease infinite;
+        }
+        @keyframes auroraShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* Slide Transitions */
+        .slide { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transform: scale(0.95) translateY(20px); transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1); padding: 2rem; }
+        .slide.active { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); }
+        .slide.prev { opacity: 0; transform: scale(1.05) translateY(-20px); pointer-events: none; }
+
+        /* Custom scrollbar for modals */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+        /* VR Mode / Vision Pro Simulation */
+        body.vr-mode { transform: perspective(1000px) rotateX(var(--gyro-x, 0deg)) rotateY(var(--gyro-y, 0deg)); }
+        body.high-contrast { background: #000000 !important; color: #ffff00 !important; }
+        body.high-contrast .glass { background: #111111 !important; border: 2px solid #ffff00 !important; }
+        body.reduced-motion *, body.reduced-motion { animation: none !important; transition: none !important; }
+
+        /* Draggable elements visual cue */
+        .draggable-item { cursor: grab; transition: transform 0.2s; }
+        .draggable-item:active { cursor: grabbing; }
+
+        @keyframes floatSlow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        .floating { animation: floatSlow 4s ease-in-out infinite; }
+    </style>
+</head>
+<body class="aurora-bg h-screen w-screen relative overflow-hidden">
+
+    <div id="bg-color-layer" class="absolute inset-0 transition-colors duration-1000 pointer-events-none -z-10"></div>
+    <div id="green-screen-layer" class="absolute inset-0 bg-[#00FF00] opacity-0 pointer-events-none transition-opacity duration-300 z-50"></div>
+
+    <header class="absolute top-0 left-0 right-0 h-20 px-6 flex items-center justify-between z-40 glass border-b border-white/10">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-accent-blue to-accent-cyan flex items-center justify-center shadow-lg shadow-accent-cyan/20">
+                <i class="fa-solid fa-mosque text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-poppins font-bold text-sm md:text-base text-white tracking-wide">STIT Ad-Da'wah</h1>
+                <p class="text-xs text-accent-cyan/80 font-medium" data-i18n="subtitle">Modul Orientasi Interaktif</p>
+            </div>
+        </div>
+
+        <!-- HUD Center Stats & XP -->
+        <div class="hidden md:flex items-center gap-6 glass px-5 py-2 rounded-full border border-white/10">
+            <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition" id="hud-stats">
+                <i class="fa-solid fa-fire text-amber-400"></i>
+                <span class="text-xs font-bold text-white" data-i18n="xp_title">XP</span>
+                <span id="hud-xp-text" class="text-xs font-bold text-accent-cyan">0</span>
+            </div>
+            <div class="w-px h-4 bg-white/20"></div>
+            <div class="flex items-center gap-2">
+                <span id="hud-level" class="text-xs px-2 py-0.5 rounded-full bg-accent-purple/30 text-accent-purple border border-accent-purple/50 font-bold">L1</span>
+            </div>
+            <div class="w-px h-4 bg-white/20"></div>
+            <div id="hud-badges" class="flex items-center gap-1">
+                <!-- Badges injected dynamically -->
+            </div>
+        </div>
+
+        <!-- HUD Controls -->
+        <div class="flex items-center gap-2 md:gap-3">
+            <button id="btn-greenscreen" class="w-10 h-10 rounded-xl glass flex items-center justify-center text-emerald-400 hover:bg-white/10 transition" title="Toggle Green Screen for OBS">
+                <i class="fa-solid fa-clapperboard"></i>
+            </button>
+            <button id="btn-tts" class="w-10 h-10 rounded-xl glass flex items-center justify-center text-gray-300 hover:bg-white/10 transition" title="Voice Narration">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+            <button id="btn-vr" class="w-10 h-10 rounded-xl glass flex items-center justify-center text-gray-300 hover:bg-white/10 transition" title="Vision Pro / VR Mode">
+                <i class="fa-solid fa-vr-cardboard"></i>
+            </button>
+            <button id="btn-a11y" class="w-10 h-10 rounded-xl glass flex items-center justify-center text-gray-300 hover:bg-white/10 transition" title="Accessibility">
+                <i class="fa-solid fa-universal-access"></i>
+            </button>
+            <button id="btn-lang" class="px-3 h-10 rounded-xl glass flex items-center justify-center text-xs font-bold text-accent-cyan hover:bg-white/10 transition">
+                ID
+            </button>
+            <button id="btn-ai" class="w-10 h-10 rounded-xl bg-accent-purple/20 border border-accent-purple/50 flex items-center justify-center text-accent-purple hover:bg-accent-purple/30 transition shadow-[0_0_15px_rgba(139,92,246,0.3)]" title="AI Tutor">
+                <i class="fa-solid fa-robot"></i>
+            </button>
+        </div>
+    </header>
+
+    <div id="start-screen" class="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center bg-space-900/90 backdrop-blur-2xl transition-opacity duration-1000">
+        <div class="w-24 h-24 rounded-3xl glass-gold flex items-center justify-center text-4xl mb-6 floating shadow-[0_0_50px_rgba(245,158,11,0.3)]">
+            🌍
+        </div>
+        <div class="glass-gold px-4 py-1.5 rounded-full text-xs font-semibold text-accent-gold mb-4 tracking-wider uppercase">
+            STIT Ad-Da'wah • 2026
+        </div>
+        <h1 class="font-poppins font-black text-4xl md:text-6xl text-white mb-4 tracking-tight max-w-4xl">
+            WELCOME TO DIGITAL CIVILIZATION
+        </h1>
+        <p class="text-gray-300 text-base md:text-lg max-w-2xl mb-8 leading-relaxed font-light" data-i18n="s1_desc">
+            Ini bukan sekadar kuliah. Ini adalah gerbang peradaban tempat ilmu, adab, dan teknologi bersatu.
+        </p>
+        
+        <!-- Trilingual Welcome Greeting -->
+        <div class="flex flex-wrap justify-center gap-3 mb-8 max-w-xl">
+            <span class="glass px-4 py-2 rounded-xl text-sm font-medium text-accent-cyan">أهلاً وسهلاً بكم في عصر المعرفة الرقمية</span>
+            <span class="glass px-4 py-2 rounded-xl text-sm font-medium text-accent-gold">Welcome to Digital Civilization</span>
+            <span class="glass px-4 py-2 rounded-xl text-sm font-medium text-white">Selamat Datang di Peradaban Digital</span>
+        </div>
+
+        <button id="btn-start" class="group relative px-8 py-4 rounded-2xl bg-gradient-to-r from-accent-blue via-accent-cyan to-accent-purple text-white font-poppins font-bold text-lg shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
+            <span data-i18n="start_btn">Mulai Pengalaman</span>
+            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </button>
+        <p class="text-xs text-gray-500 mt-6" data-i18n="offline_ready">Siap Offline (PWA) • Audio Spasial Aktif</p>
+    </div>
+
+    <main id="app-content" class="absolute inset-0 hidden">
+
+        <!-- Scene 1: Universe Opening -->
+        <section id="scene-1" class="slide active" data-voice="Selamat datang di gerbang peradaban digital. Mari kita selami evolusi pengetahuan manusia dari gua purba hingga era kecerdasan buatan.">
+            <div class="max-w-4xl text-center draggable-item" draggable="true">
+                <div class="text-6xl md:text-8xl mb-6 floating">🌌</div>
+                <h2 class="font-poppins font-extrabold text-3xl md:text-5xl text-white mb-4">Gerbang Peradaban Semesta</h2>
+                <p class="text-gray-300 text-lg md:text-xl font-light mb-8">Setiap ketukan, setiap byte data, dan setiap cahaya layar adalah bagian dari takdir agung manusia sebagai khalifah di muka bumi.</p>
+                <div class="glass p-6 rounded-2xl max-w-xl mx-auto border border-white/10 text-left">
+                    <div class="flex items-center gap-3 text-accent-cyan font-bold mb-2">
+                        <i class="fa-solid fa-book-open"></i> Refleksi Qs. Al-Alaq [1-5]
+                    </div>
+                    <p class="text-sm text-gray-200 italic">"Bacalah dengan (menyebut) nama Tuhanmu yang menciptakan..."</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scene 2: Birth of Civilization -->
+        <section id="scene-2" class="slide" data-voice="Fase pertama, revolusi pengetahuan. Dari goresan batu hingga risalah kenabian yang membawa pencerahan abadi.">
+            <div class="max-w-4xl text-center draggable-item" draggable="true">
+                <div class="text-6xl md:text-8xl mb-6 floating">📜</div>
+                <span class="text-xs font-bold text-accent-gold uppercase tracking-widest bg-accent-gold/10 px-3 py-1 rounded-full">Fase 01</span>
+                <h2 class="font-poppins font-extrabold text-3xl md:text-5xl text-white mt-4 mb-4">Lahirnya Peradaban & Tulisan</h2>
+                <p class="text-gray-300 text-lg md:text-xl font-light mb-8">Manusia purba merekam ingatan di dinding gua. Pengetahuan menjadi abadi, melampaui batasan generasi dan ruang waktu.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left max-w-2xl mx-auto">
+                    <div class="glass p-4 rounded-xl">
+                        <h4 class="font-bold text-white mb-1">Tulisan Kuneiform</h4>
+                        <p class="text-xs text-gray-400">Pencatatan inventaris dan hukum pertama di Mesopotamia (3200 SM).</p>
+                    </div>
+                    <div class="glass p-4 rounded-xl">
+                        <h4 class="font-bold text-white mb-1">Tradisi Lisan & Hafalan</h4>
+                        <p class="text-xs text-gray-400">Keakuratan transmisi ilmu melalui sanad dan hafalan qari terpercaya.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scene 3: Printing Revolution -->
+        <section id="scene-3" class="slide" data-voice="Revolusi Mesin Cetak Gutenberg mendemokratisasi ilmu pengetahuan, mengubah buku dari barang mewah menjadi hak setiap insan.">
+            <div class="max-w-4xl text-center draggable-item" draggable="true">
+                <div class="text-6xl md:text-8xl mb-6 floating">📖</div>
+                <h2 class="font-poppins font-extrabold text-3xl md:text-5xl text-white mb-4">Revolusi Mesin Cetak</h2>
+                <p class="text-gray-300 text-lg md:text-xl font-light mb-8">Gutenberg menyalakan api literasi massal pada abad ke-15. Buku menyebar ke seluruh benua, memicu Renaisans dan pencerahan.</p>
+                <div class="glass p-6 rounded-2xl max-w-xl mx-auto text-center border-accent-blue/30">
+                    <div class="text-3xl font-black text-accent-blue mb-1">+400%</div>
+                    <p class="text-xs text-gray-300">Peningkatan kecepatan reproduksi naskah ilmiah di Eropa pasca 1450.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scene 4: Industrial & Computer Revolution -->
+        <section id="scene-4" class="slide" data-voice="Dari uap hingga transistor. Komputer lahir untuk menghitung kemungkinan tak terbatas dan mempercepat peradaban.">
+            <div class="max-w-4xl text-center draggable-item" draggable="true">
+                <div class="text-6xl md:text-8xl mb-6 floating">💻</div>
+                <h2 class="font-poppins font-extrabold text-3xl md:text-5xl text-white mb-4">Era Komputasi & Transistor</h2>
+                <p class="text-gray-300 text-lg md:text-xl font-light mb-8">Kalkulator mekanik Pascal berkembang menjadi sirkuit mikro. Mesin mulai berpikir, menghitung logika, dan mengolah jutaan data seketika.</p>
+                <div class="grid grid-cols-3 gap-4 max-w-xl mx-auto text-center">
+                    <div class="glass p-3 rounded-xl"><div class="text-lg font-bold text-accent-cyan">1946</div><div class="text-xs text-gray-400">ENIAC</div></div>
+                    <div class="glass p-3 rounded-xl"><div class="text-lg font-bold text-accent-gold">1971</div><div class="text-xs text-gray-400">Microprocessor</div></div>
+                    <div class="glass p-3 rounded-xl"><div class="text-lg font-bold text-accent-purple">1980s</div><div class="text-xs text-gray-400">PC Era</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scene 5: Internet & Social Media Revolution -->
+        <section id="scene-5" class="slide" data-voice="Internet menghubungkan seluruh umat manusia. Jaringan global mengubah bumi menjadi desa digital tanpa sekat.">
+            <div class="max-w-4xl text-center draggable-item" draggable="true">
+                <div class="text-6xl md:text-8xl mb-6 floating">🛰</div>
+                <h2 class="font-poppins font-extrabold text-3xl md:text-5xl text-white mb-4">Jaringan Global & Web</h2>
+                <p class="text-gray-300 text-lg md:text-xl font-light mb-8">ARPANET melahirkan World Wide Web. Kini 5,4 miliar penduduk bumi terhubung dalam satu aliran informasi real-time.</p>
+                <div class="glass p-6 rounded-2xl max-w-xl mx-auto">
+                    <div class="flex justify-between text-sm mb-2"><span class="text-gray-400">Pengguna Internet Global</span><span class="text-accent-cyan font-bold">67.5% Populasi Dunia</span></div>
+                    <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-accent-cyan w-2/3"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scene 6: AI Revolution & Story Engine Choice -->
+        <section id="scene-6" class="slide" data-voice="Kecerdasan Buatan telah hadir. Mesin kini mampu mencipta seni, menulis kode, dan menganalisis data. Di persimpangan ini, siapakah Anda?">
+            <div class="max-w-4xl text-center draggable-item" draggable="true">
+                <div class="text-6xl md:text-8xl mb-6 floating">🤖</div>
+                <h2 class="font-poppins font-extrabold text-3xl md:text-5xl text-white mb-4">Era Kecerdasan Buatan (AI)</h2>
+                <p class="text-gray-300 text-lg md:text-xl font-light mb-6">AI merevolusi dunia pendidikan dan profesi guru. Pilihlah peran strategis Anda dalam peradaban digital ini:</p>
+                
+                <!-- Story Engine Choices -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-3xl mx-auto">
+                    <button class="choice-btn glass p-5 rounded-2xl hover:border-accent-blue transition group" data-target="7a" data-xp="20">
+                        <div class="text-2xl mb-2">🌊</div>
+                        <h4 class="font-bold text-white group-hover:text-accent-blue" data-i18n="s6_c1">Konsumen Pasif</h4>
+                        <p class="text-xs text-gray-400 mt-1">Menikmati kemudahan teknologi tanpa menyaring nilai dan etika.</p>
+                    </button>
+                    <button class="choice-btn glass p-5 rounded-2xl hover:border-accent-cyan transition group" data-target="7b" data-xp="30" data-badge="Creator">
+                        <div class="text-2xl mb-2">⚡</div>
+                        <h4 class="font-bold text-white group-hover:text-accent-cyan" data-i18n="s6_c2">Kreator Bising</h4>
+                        <p class="text-xs text-gray-400 mt-1">Memproduksi konten viral tanpa substansi mendalam dan adab.</p>
+                    </button>
+                    <button class="choice-btn glass p-5 rounded-2xl hover:border-accent-gold transition group" data-target="7c" data-xp="50" data-badge="Leader">
+                        <div class="text-2xl mb-2">👑</div>
+                        <h4 class="font-bold text-white group-hover:text-accent-gold" data-i18n="s6_c3">Pemimpin Peradaban</h4>
+                        <p class="text-xs text-gray-400 mt-1">Guru & Da'i yang mengarahkan teknologi dengan landasan akhlak.</p>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Branch: 7a (Consumer) -->
+        <section id="scene-7a" class="slide" data-voice="Menjadi konsumen pasif membuat kita terhanyut arus disinformasi. Mari bangkit menjadi arsitek masa depan.">
+            <div class="max-w-4xl text-center">
+                <div class="text-6xl mb-4">📉</div>
+                <h2 class="font-poppins font-extrabold text-3xl text-amber-400 mb-4">Jalur Konsumen Pasif</h2>
+                <p class="text-gray-300 text-lg mb-6">Terlalu banyak menyerap informasi tanpa filter mengikis daya kritis dan kedalaman spiritual.</p>
+                <button class="continue-btn px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition">Lanjutkan Perjalanan Visi <i class="fa-solid fa-arrow-right ml-2"></i></button>
+            </div>
+        </section>
+
+        <!-- Dynamic Branch: 7b (Creator) -->
+        <section id="scene-7b" class="slide" data-voice="Kreator bising menghasilkan kebisingan algoritma. Kita butuhkan kreator yang mencerahkan jiwa.">
+            <div class="max-w-4xl text-center">
+                <div class="text-6xl mb-4">📊</div>
+                <h2 class="font-poppins font-extrabold text-3xl text-accent-cyan mb-4">Jalur Kreator Bising</h2>
+                <p class="text-gray-300 text-lg mb-6">Viral itu mudah, namun kebermanfaatan jangka panjang menuntut integritas dan adab keilmuan.</p>
+                <button class="continue-btn px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition">Lanjutkan Perjalanan Visi <i class="fa-solid fa-arrow-right ml-2"></i></button>
+            </div>
+        </section>
+
+        <!-- Dynamic Branch: 7c (Leader) -->
+        <section id="scene-7c" class="slide" data-voice="Pilihan mulia. Pemimpin peradaban memadukan kecanggihan teknologi dengan kedalaman nilai Qurani.">
+            <div class="max-w-4xl text-center">
+                <div class="text-6xl mb-4">🕌</div>
+                <h2 class="font-poppins font-extrabold text-3xl text-accent-gold mb-4">Jalur Pemimpin Peradaban</h2>
+                <p class="text-gray-300 text-lg mb-6">Anda memilih jalan para Nabi dan Ulama pembaharu. Membimbing umat di era digital dengan bijaksana.</p>
+                <button class="continue-btn px-6 py-3 rounded-xl bg-accent-gold/20 border border-accent-gold text-accent-gold font-bold transition hover:bg-accent-gold/30">Terima Amanah Mulia <i class="fa-solid fa-arrow-right ml-2"></i></button>
+            </div>
+        </section>
+
+        <!-- Scene 8: Irreplaceable by Machines -->
+        <section id="scene-8" class="slide" data-voice="Apa yang tidak bisa digantikan mesin? Transfer adab, kehangatan jiwa, dan kurasi kebenaran mutlak.">
+            <div class="max-w-4xl text-center draggable-item" draggable="true">
+                <div class="text-6xl md:text-8xl mb-6 floating">❤️</div>
+                <h2 class="font-poppins font-extrabold text-3xl md:text-5xl text-white mb-4" data-i18n="s8_title">Peran yang Tak Tergantikan</h2>
+                <p class="text-gray-300 text-lg md:text-xl font-light mb-8" data-i18n="s8_desc">Mesin menghitung data, namun manusia menghidupkan jiwa. Guru sejati menanamkan keteladanan akhlak yang tidak ada dalam barisan kode.</p>
+                <div class="grid grid-cols-3 gap-4 max-w-xl mx-auto text-left">
+                    <div class="glass p-4 rounded-xl"><div class="text-accent-cyan font-bold mb-1">Empati</div><p class="text-xs text-gray-400">Merasakan kesulitan murid.</p></div>
+                    <div class="glass p-4 rounded-xl"><div class="text-accent-gold font-bold mb-1">Keteladanan</div><p class="text-xs text-gray-400">Akhlak mulia nyata.</p></div>
+                    <div class="glass p-4 rounded-xl"><div class="text-accent-purple font-bold mb-1">Kebijaksanaan</div><p class="text-xs text-gray-400">Menilai benar & salah.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scene 9: Digital Ethics & Adab -->
+        <section id="scene-9" class="slide" data-voice="Adab di atas ilmu. Di era informasi yang bergerak secepat kilat, tabayyun dan etika adalah benteng pertahanan terakhir.">
+            <div class="max-w-4xl text-center draggable-item" draggable="true">
+                <div class="text-6xl md:text-8xl mb-6 floating">🛡</div>
+                <h2 class="font-poppins font-extrabold text-3xl md:text-5xl text-white mb-4">Adab & Tabayyun di Era Siber</h2>
+                <p class="text-gray-300 text-lg md:text-xl font-light mb-8" data-i18n="s9_desc">Hoaks dan fitnah menyebar dalam detik. Prinsip Tabayyun (Q.S. Al-Hujurat: 6) adalah filter utama seorang cendekiawan Muslim.</p>
+                <div class="glass p-6 rounded-2xl max-w-xl mx-auto border-accent-purple/30 text-left">
+                    <div class="text-accent-purple font-bold mb-1">Prinsip Tabayyun Digital</div>
+                    <p class="text-xs text-gray-300">"Hai orang-orang yang beriman, jika datang kepadamu orang fasik membawa suatu berita, maka periksalah dengan teliti..."</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scene 10: Mission Acceptance -->
+        <section id="scene-10" class="slide" data-voice="Masa depan peradaban Islam ada di tangan Anda. Apakah Anda siap mengemban misi suci ini?">
+            <div class="max-w-4xl text-center draggable-item" draggable="true">
+                <div class="text-6xl md:text-8xl mb-6 floating">🎓</div>
+                <h2 class="font-poppins font-extrabold text-3xl md:text-5xl text-white mb-4" data-i18n="s10_title">Siap Menerima Misi Peradaban?</h2>
+                <p class="text-gray-300 text-lg md:text-xl font-light mb-8">Jadilah Guru Digital dan Da'i pembawa rahmat bagi semesta alam (Rahmatan lil 'Alamin).</p>
+                <button id="btn-finish" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-accent-cyan text-space-900 font-poppins font-bold text-lg shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:scale-105 transition">
+                    <span class="relative z-10 flex items-center gap-3" data-i18n="s10_btn">Saya Siap Berjuang</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="absolute bottom-0 left-0 right-0 h-20 px-6 flex items-center justify-between z-40 glass border-t border-white/10">
+        <button id="btn-prev" class="px-5 py-2.5 rounded-xl glass text-gray-300 hover:text-white font-medium text-sm flex items-center gap-2 transition disabled:opacity-30 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-arrow-left"></i> <span class="hidden md:inline">Sebelumnya</span>
+        </button>
+        
+        <div class="flex items-center gap-4">
+            <div class="w-32 md:w-48 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-accent-blue to-accent-cyan transition-all duration-500 w-0"></div>
+            </div>
+            <span id="scene-counter" class="text-xs font-mono text-gray-400">01 / 10</span>
+        </div>
+
+        <button id="btn-next" class="px-5 py-2.5 rounded-xl bg-white/10 text-white font-medium text-sm flex items-center gap-2 hover:bg-white/20 transition">
+            <span class="hidden md:inline">Lanjut</span> <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </footer>
+
+    <div id="ai-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass w-full max-w-lg rounded-3xl p-6 border border-accent-purple/30 shadow-[0_0_50px_rgba(139,92,246,0.2)] flex flex-col h-[500px]">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-accent-purple/20 flex items-center justify-center text-accent-purple"><i class="fa-solid fa-robot"></i></div>
+                    <div><h3 class="font-poppins font-bold text-white text-sm">AI Digital Mentor</h3><p class="text-xs text-accent-purple">Siap menjawab pertanyaan Anda</p></div>
+                </div>
+                <button id="close-ai" class="w-8 h-8 rounded-full glass flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="chat-history" class="flex-1 overflow-y-auto py-4 flex flex-col gap-3 text-sm">
+                <div class="chat-message bg-accent-purple/20 border border-accent-purple/30 p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl text-gray-200 w-11/12">
+                    Selamat datang! Tanyakan apa saja mengenai literasi digital, adab, atau teknologi pendidikan.
+                </div>
+            </div>
+            <div class="pt-3 border-t border-white/10 flex gap-2">
+                <input type="text" id="chat-input" placeholder="Ketik pertanyaan..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-accent-purple">
+                <button id="btn-send-chat" class="px-4 py-2.5 rounded-xl bg-accent-purple text-white font-bold hover:opacity-90 transition"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="analytics-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass w-full max-w-md rounded-3xl p-6 border border-accent-cyan/30 flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                <h3 class="font-poppins font-bold text-white">Statistik & Profil Belajar</h3>
+                <button id="close-analytics" class="w-8 h-8 rounded-full glass flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="py-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass p-4 rounded-2xl text-center"><div class="text-xs text-gray-400">Total XP</div><div id="stat-xp" class="text-2xl font-black text-accent-cyan mt-1">0</div></div>
+                    <div class="glass p-4 rounded-2xl text-center"><div class="text-xs text-gray-400">Waktu Belajar</div><div id="stat-time" class="text-2xl font-black text-accent-gold mt-1">0m</div></div>
+                </div>
+                <div class="glass p-4 rounded-2xl">
+                    <div class="text-xs text-gray-400 mb-2">Jalur Visi Terpilih</div>
+                    <div id="stat-path" class="text-sm font-bold text-white">Belum Memilih</div>
+                </div>
+                <div class="glass p-4 rounded-2xl">
+                    <div class="text-xs text-gray-400 mb-2">Badge Koleksi</div>
+                    <div id="stat-badges-container" class="flex flex-wrap gap-2"><span class="text-xs text-gray-500">Belum ada badge</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="a11y-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass w-full max-w-sm rounded-3xl p-6 border border-white/20 flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                <h3 class="font-poppins font-bold text-white">Pengaturan Aksesibilitas</h3>
+                <button id="close-a11y" class="w-8 h-8 rounded-full glass flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="py-6 space-y-4">
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span class="text-sm text-gray-200">Kontras Tinggi</span>
+                    <input type="checkbox" id="toggle-contrast" class="w-5 h-5 accent-accent-cyan">
+                </label>
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span class="text-sm text-gray-200">Kurangi Animasi (Motion)</span>
+                    <input type="checkbox" id="toggle-motion" class="w-5 h-5 accent-accent-cyan">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-24 left-0 right-0 z-50 pointer-events-none flex flex-col items-center gap-2"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            let currentSlide = 0;
+            let timeline = ['scene-1', 'scene-2', 'scene-3', 'scene-4', 'scene-5', 'scene-6', 'scene-8', 'scene-9', 'scene-10'];
+            let audioContextStarted = false;
+            let startTime = Date.now();
+            
+            const state = {
+                xp: 0,
+                level: 1,
+                badges: [],
+                choice: null,
+                lang: 'id',
+                ttsEnabled: false,
+                vrMode: false,
+                greenScreenMode: false
+            };
+
+            const i18n = {
+                'id': {
+                    'subtitle': 'Modul Orientasi Interaktif', 'start_btn': 'Mulai Pengalaman', 'offline_ready': 'Siap Offline (PWA)',
+                    's1_desc': 'Ini bukan sekadar kuliah. Ini adalah gerbang peradaban tempat ilmu, adab, dan teknologi bersatu.',
+                    's6_c1': 'Konsumen Pasif', 's6_c2': 'Kreator Bising', 's6_c3': 'Pemimpin Peradaban',
+                    's8_title': 'Peran yang Tak Tergantikan', 's8_desc': 'Mesin menghitung data, namun manusia menghidupkan jiwa. Guru sejati menanamkan keteladanan akhlak.',
+                    's9_desc': 'Hoaks dan fitnah menyebar dalam detik. Prinsip Tabayyun adalah filter utama seorang cendekiawan Muslim.',
+                    's10_title': 'Siap Menerima Misi Peradaban?', 's10_btn': 'Saya Siap Berjuang', 'xp_title': 'XP'
+                },
+                'en': {
+                    'subtitle': 'Interactive Orientation Module', 'start_btn': 'Start Experience', 'offline_ready': 'Offline Ready (PWA)',
+                    's1_desc': 'Not just a lecture. This is the gateway to civilization where knowledge, ethics, and technology unite.',
+                    's6_c1': 'Passive Consumer', 's6_c2': 'Noisy Creator', 's6_c3': 'Civilization Leader',
+                    's8_title': 'Irreplaceable Roles', 's8_desc': 'Machines process data, but humans awaken souls.',
+                    's9_desc': 'Tabayyun is the main filter for a Muslim scholar against misinformation.',
+                    's10_title': 'Ready to Accept the Mission?', 's10_btn': 'I Am Ready', 'xp_title': 'XP'
+                }
+            };
+
+            const els = {
+                app: document.getElementById('app-content'),
+                start: document.getElementById('start-screen'),
+                btnStart: document.getElementById('btn-start'),
+                btnNext: document.getElementById('btn-next'),
+                btnPrev: document.getElementById('btn-prev'),
+                progress: document.getElementById('progress-bar'),
+                counter: document.getElementById('scene-counter'),
+                bgColor: document.getElementById('bg-color-layer'),
+                greenScreen: document.getElementById('green-screen-layer'),
+                toastContainer: document.getElementById('toast-container'),
+                hudXP: document.getElementById('hud-xp-text'),
+                hudXPBar: document.getElementById('hud-xp-bar'),
+                hudLevel: document.getElementById('hud-level'),
+                hudBadges: document.getElementById('hud-badges')
+            };
+
+            // Audio Engine using Tone.js
+            let bgMusic, sfxClick, sfxSuccess, sfxNext;
+            let synthVoice = window.speechSynthesis;
+
+            async function initAudio() {
+                if(audioContextStarted) return;
+                await Tone.start();
+                audioContextStarted = true;
+
+                bgMusic = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" }, envelope: { attack: 2, release: 4 } }).toDestination();
+                bgMusic.volume.value = -28;
+                
+                sfxClick = new Tone.MembraneSynth({ pitchDecay: 0.05, oscillator: { type: "sine" } }).toDestination();
+                sfxClick.volume.value = -15;
+
+                sfxSuccess = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "triangle" } }).toDestination();
+                sfxSuccess.volume.value = -15;
+
+                sfxNext = new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination();
+                sfxNext.volume.value = -18;
+
+                bgMusic.triggerAttack(["C3", "G3", "Eb4", "D5"]);
+            }
+
+            function playClick() { if(audioContextStarted) sfxClick?.triggerAttackRelease("C3", "8n"); }
+            function playNextSound() { if(audioContextStarted) sfxNext?.triggerAttackRelease("G4", "16n"); }
+            function playLevelUp() { if(audioContextStarted) sfxSuccess?.triggerAttackRelease(["C4", "E4", "G4", "C5"], "2n"); }
+
+            function speak(text) {
+                if(!state.ttsEnabled) return;
+                synthVoice.cancel();
+                let utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = state.lang === 'id' ? 'id-ID' : 'en-US';
+                utterance.rate = 0.95;
+                synthVoice.speak(utterance);
+            }
+
+            function addXP(amount) {
+                state.xp += amount;
+                const newLevel = Math.floor(state.xp / 100) + 1;
+                if(newLevel > state.level) {
+                    state.level = newLevel;
+                    showToast(`Level Up! Level ${state.level} 🌟`, 'gold');
+                    playLevelUp();
+                }
+                if (els.hudXP) els.hudXP.innerText = state.xp;
+                if (els.hudLevel) els.hudLevel.innerText = `L${state.level}`;
+                showToast(`+${amount} XP`, 'cyan');
+            }
+
+            function unlockBadge(name, icon) {
+                if(!state.badges.some(b => b.name === name)) {
+                    state.badges.push({name, icon});
+                    showToast(`Badge Unlocked: ${name} ${icon}`, 'purple');
+                    playLevelUp();
+                    if (els.hudBadges) {
+                        els.hudBadges.innerHTML = state.badges.map(b => `<div class="w-6 h-6 rounded-full bg-accent-purple/20 border border-accent-purple flex items-center justify-center text-xs" title="${b.name}">${b.icon}</div>`).join('');
+                    }
+                }
+            }
+
+            function showToast(msg, color) {
+                const toast = document.createElement('div');
+                toast.className = `px-4 py-2 rounded-full glass border border-accent-${color} text-white font-bold text-sm shadow-xl`;
+                toast.innerHTML = msg;
+                if (els.toastContainer) {
+                    els.toastContainer.appendChild(toast);
+                    setTimeout(() => toast.remove(), 2000);
+                }
+            }
+
+            function buildTimeline() {
+                timeline = ['scene-1', 'scene-2', 'scene-3', 'scene-4', 'scene-5', 'scene-6'];
+                if(state.choice) timeline.push(state.choice);
+                timeline.push('scene-8', 'scene-9', 'scene-10');
+            }
+
+            function updateSlideView() {
+                const total = timeline.length;
+                const progress = (currentSlide / (total - 1)) * 100;
+                if (els.progress) els.progress.style.width = `${progress}%`;
+                if (els.counter) els.counter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${total}`;
+
+                if (els.btnPrev) els.btnPrev.disabled = currentSlide === 0;
+                if (els.btnNext) els.btnNext.style.display = (currentSlide === total - 1) ? 'none' : 'flex';
+
+                document.querySelectorAll('.slide').forEach(s => s.classList.remove('active', 'prev'));
+
+                const activeSceneId = timeline[currentSlide];
+                const activeEl = document.getElementById(activeSceneId);
+                
+                let foundActive = false;
+                timeline.forEach(id => {
+                    if(id === activeSceneId) foundActive = true;
+                    else if(!foundActive) {
+                        const el = document.getElementById(id);
+                        if(el) el.classList.add('prev');
+                    }
+                });
+
+                if(activeEl) {
+                    activeEl.classList.add('active');
+                    if(activeEl.dataset.voice) speak(activeEl.dataset.voice);
+                }
+            }
+
+            function goNext() {
+                if(timeline[currentSlide] === 'scene-6' && !state.choice) {
+                    showToast("Silakan pilih jalur Anda dulu!", 'red');
+                    return;
+                }
+                if (currentSlide < timeline.length - 1) {
+                    currentSlide++;
+                    playNextSound();
+                    addXP(5);
+                    updateSlideView();
+                }
+            }
+
+            function goPrev() {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    playClick();
+                    updateSlideView();
+                }
+            }
+
+            // Safe Event Listeners Binding with Existence Checks
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const target = 'scene-' + btn.dataset.target;
+                    const xp = parseInt(btn.dataset.xp || 10);
+                    state.choice = target;
+                    
+                    document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('ring-4', 'ring-white', 'scale-105'));
+                    btn.classList.add('ring-4', 'ring-white', 'scale-105');
+                    
+                    addXP(xp);
+                    if(btn.dataset.badge) unlockBadge(btn.dataset.badge, '👑');
+                    
+                    buildTimeline();
+                    showToast("Jalur dipilih. Klik Lanjut.", 'cyan');
+                    playClick();
+                });
+            });
+
+            document.querySelectorAll('.continue-btn').forEach(btn => {
+                btn.addEventListener('click', goNext);
+            });
+
+            // AI Chat
+            const chatHistory = document.getElementById('chat-history');
+            const chatInput = document.getElementById('chat-input');
+            const btnSendChat = document.getElementById('btn-send-chat');
+
+            function addChatMessage(text, sender) {
+                if (!chatHistory) return;
+                const div = document.createElement('div');
+                if(sender === 'user') {
+                    div.className = 'bg-white/10 border border-white/20 p-3 rounded-tl-xl rounded-bl-xl rounded-br-xl text-white w-10/12 ml-auto';
+                } else {
+                    div.className = 'bg-accent-purple/20 border border-accent-purple/30 p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl text-gray-200 w-11/12';
+                }
+                div.innerText = text;
+                chatHistory.appendChild(div);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+
+            if(btnSendChat && chatInput) {
+                btnSendChat.addEventListener('click', () => {
+                    const txt = chatInput.value.trim();
+                    if(!txt) return;
+                    addChatMessage(txt, 'user');
+                    chatInput.value = '';
+                    setTimeout(() => addChatMessage("Pertanyaan yang luar biasa! Integrasi ilmu dan adab adalah kunci utama sukses di era digital.", 'ai'), 600);
+                });
+                chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') btnSendChat.click(); });
+            }
+
+            // Modals toggle helper
+            const toggleModal = (id, show) => {
+                const el = document.getElementById(id);
+                if(el) {
+                    if(show) el.classList.remove('opacity-0', 'pointer-events-none');
+                    else el.classList.add('opacity-0', 'pointer-events-none');
+                }
+            };
+
+            const btnAI = document.getElementById('btn-ai');
+            if(btnAI) btnAI.addEventListener('click', () => { toggleModal('ai-modal', true); playClick(); });
+            const closeAI = document.getElementById('close-ai');
+            if(closeAI) closeAI.addEventListener('click', () => toggleModal('ai-modal', false));
+
+            const hudStats = document.getElementById('hud-stats');
+            if(hudStats) hudStats.addEventListener('click', () => {
+                const statXP = document.getElementById('stat-xp');
+                const statTime = document.getElementById('stat-time');
+                if(statXP) statXP.innerText = state.xp;
+                if(statTime) statTime.innerText = Math.floor((Date.now() - startTime) / 60000) + 'm';
+                toggleModal('analytics-modal', true);
+                playClick();
+            });
+            const closeAnalytics = document.getElementById('close-analytics');
+            if(closeAnalytics) closeAnalytics.addEventListener('click', () => toggleModal('analytics-modal', false));
+
+            const btnA11y = document.getElementById('btn-a11y');
+            if(btnA11y) btnA11y.addEventListener('click', () => { toggleModal('a11y-modal', true); playClick(); });
+            const closeA11y = document.getElementById('close-a11y');
+            if(closeA11y) closeA11y.addEventListener('click', () => toggleModal('a11y-modal', false));
+
+            const toggleContrast = document.getElementById('toggle-contrast');
+            if(toggleContrast) toggleContrast.addEventListener('change', (e) => document.body.classList.toggle('high-contrast', e.target.checked));
+            const toggleMotion = document.getElementById('toggle-motion');
+            if(toggleMotion) toggleMotion.addEventListener('change', (e) => document.body.classList.toggle('reduced-motion', e.target.checked));
+
+            const btnTTS = document.getElementById('btn-tts');
+            if(btnTTS) btnTTS.addEventListener('click', (e) => {
+                state.ttsEnabled = !state.ttsEnabled;
+                e.currentTarget.classList.toggle('text-accent-cyan', state.ttsEnabled);
+                showToast(state.ttsEnabled ? "Voice Narration ON" : "Voice Narration OFF", 'cyan');
+                if(!state.ttsEnabled) synthVoice.cancel();
+                playClick();
+            });
+
+            const btnVR = document.getElementById('btn-vr');
+            if(btnVR) btnVR.addEventListener('click', () => {
+                state.vrMode = !state.vrMode;
+                document.body.classList.toggle('vr-mode', state.vrMode);
+                showToast(state.vrMode ? "Vision Pro VR Mode Activated" : "Standard Mode", 'gold');
+                playClick();
+            });
+
+            // Green Screen Mode Toggle
+            const btnGreenScreen = document.getElementById('btn-greenscreen');
+            if(btnGreenScreen) {
+                btnGreenScreen.addEventListener('click', () => {
+                    state.greenScreenMode = !state.greenScreenMode;
+                    if(els.greenScreen) {
+                        els.greenScreen.style.opacity = state.greenScreenMode ? '1' : '0';
+                    }
+                    showToast(state.greenScreenMode ? "Green Screen Active for OBS" : "Green Screen Off", 'emerald');
+                    playClick();
+                });
+            }
+
+            const btnLang = document.getElementById('btn-lang');
+            if(btnLang) {
+                btnLang.addEventListener('click', (e) => {
+                    state.lang = state.lang === 'id' ? 'en' : 'id';
+                    e.currentTarget.innerText = state.lang.toUpperCase();
+                    document.querySelectorAll('[data-i18n]').forEach(el => {
+                        const key = el.getAttribute('data-i18n');
+                        if(i18n[state.lang] && i18n[state.lang][key]) el.innerText = i18n[state.lang][key];
+                    });
+                    playClick();
+                });
+            }
+
+            if(els.btnStart) {
+                els.btnStart.addEventListener('click', async () => {
+                    await initAudio();
+                    els.start.style.opacity = '0';
+                    setTimeout(() => {
+                        els.start.style.display = 'none';
+                        els.app.classList.remove('hidden');
+                        buildTimeline();
+                        updateSlideView();
+                    }, 800);
+                });
+            }
+
+            if(els.btnNext) els.btnNext.addEventListener('click', goNext);
+            if(els.btnPrev) els.btnPrev.addEventListener('click', goPrev);
+
+            const btnFinish = document.getElementById('btn-finish');
+            if(btnFinish) {
+                btnFinish.addEventListener('click', () => {
+                    addXP(100);
+                    unlockBadge("Graduate", "🎓");
+                    showToast("Selamat! Anda resmi menjadi Pemimpin Peradaban Digital", 'gold');
+                    setTimeout(() => hudStats?.click(), 1000);
+                });
+            }
+
+            // Keyboard & Touch Nav
+            document.addEventListener('keydown', (e) => {
+                if (els.start && els.start.style.display !== 'none' && (e.key === 'Enter' || e.key === ' ')) {
+                    els.btnStart?.click();
+                } else if (e.key === 'ArrowRight' || e.key === ' ') {
+                    goNext();
+                } else if (e.key === 'ArrowLeft') {
+                    goPrev();
+                }
+            });
+
+            let touchStartX = 0;
+            if(els.app) {
+                els.app.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
+                els.app.addEventListener('touchend', e => {
+                    if (e.changedTouches[0].screenX < touchStartX - 50) goNext();
+                    if (e.changedTouches[0].screenX > touchStartX + 50) goPrev();
+                }, {passive: true});
+            }
+
+            // Draggable Elements implementation across all slides
+            let activeDraggable = null;
+            let startX = 0, startY = 0, initialX = 0, initialY = 0;
+
+            document.addEventListener('mousedown', (e) => {
+                const item = e.target.closest('.draggable-item');
+                if(item) {
+                    activeDraggable = item;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    const rect = item.getBoundingClientRect();
+                    initialX = rect.left;
+                    initialY = rect.top;
+                    item.style.position = 'relative';
+                }
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if(!activeDraggable) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                activeDraggable.style.transform = `translate(${dx}px, ${dy}px)`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                activeDraggable = null;
+            });
+        });
+    </script>
+</body>
+</html>
