@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Welcome to Digital Civilization | STIT Ad-Da'wah</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tone.js for Audio Synthesis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        space: {
+                            900: '#050510',
+                            800: '#0a0a20',
+                            700: '#111133',
+                        },
+                        accent: {
+                            cyan: '#00f0ff',
+                            blue: '#0055ff',
+                            gold: '#ffd700',
+                            emerald: '#00ff88',
+                            purple: '#b000ff'
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 20s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'aurora': 'aurora 15s ease infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.4', filter: 'blur(20px)' },
+                            '50%': { opacity: '0.8', filter: 'blur(30px)' },
+                        },
+                        aurora: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Reset & Core Styles */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #050510;
+            color: white;
+            overflow: hidden; /* Prevent scrolling */
+            touch-action: none; /* Prevent browser touch actions like pinch-zoom */
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glass-panel {
+            background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-top: 1px solid rgba(255,255,255,0.25);
+            border-left: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.5);
+        }
+
+        /* Background Effects */
+        .bg-aurora {
+            background: linear-gradient(-45deg, #0a0a20, #111133, #1a0b2e, #0b1a2e);
+            background-size: 400% 400%;
+        }
+
+        .star-field {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 130px 80px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 160px 120px, #ffffff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.3;
+            animation: zoomStars 100s linear infinite;
+        }
+
+        @keyframes zoomStars {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.5); }
+        }
+
+        /* Slide Transitions */
+        .slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.7s cubic-bezier(0.645, 0.045, 0.355, 1);
+            transform: scale(1.03);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+            z-index: 20;
+        }
+
+        .slide.prev {
+            transform: scale(0.95);
+        }
+
+        /* Inner Element Animations triggered when slide is active */
+        .stagger-1, .stagger-2, .stagger-3, .stagger-4 {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .active .stagger-1 { opacity: 1; transform: translateY(0); transition-delay: 0.2s; }
+        .active .stagger-2 { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
+        .active .stagger-3 { opacity: 1; transform: translateY(0); transition-delay: 0.6s; }
+        .active .stagger-4 { opacity: 1; transform: translateY(0); transition-delay: 0.8s; }
+
+        /* Typography Enhancements */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        /* UI Controls */
+        .nav-btn {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.15);
+            transform: scale(1.1);
+        }
+        .nav-btn:active { transform: scale(0.95); }
+
+        /* Progress Bar */
+        #progress-bar {
+            transition: width 0.5s ease-out;
+        }
+
+        /* Start Screen */
+        #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 1s ease;
+        }
+
+        /* Green Screen Mode Overrides (OBS/Video Editing) */
+        body.gs-active { 
+            background-color: #00FF00 !important; 
+            background-image: none !important; 
+        }
+        body.gs-active #bg-color-layer, 
+        body.gs-active #bg-effect-layer,
+        body.gs-active .star-field, 
+        body.gs-active .animate-pulse-glow { 
+            display: none !important; 
+        }
+        body.gs-active .glass, 
+        body.gs-active .glass-panel {
+            backdrop-filter: none !important; 
+            -webkit-backdrop-filter: none !important;
+            background: rgba(15, 15, 15, 0.95) !important; 
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+        }
+        body.gs-active .glow-text, 
+        body.gs-active h1, 
+        body.gs-active h2 { 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important; /* Ensure text is readable over green */
+        }
+
+        /* Emojis as huge graphic elements */
+        .hero-emoji {
+            font-size: clamp(6rem, 15vw, 12rem);
+            line-height: 1;
+            filter: drop-shadow(0 0 40px rgba(255,255,255,0.3));
+        }
+
+        /* Draggable System (Green Screen / Custom Layout Utility) */
+        .draggable {
+            cursor: grab;
+            touch-action: none; /* Prevent scroll interference */
+            position: relative;
+            z-index: 50;
+            transition: filter 0.2s ease, box-shadow 0.2s ease;
+        }
+        .draggable:active {
+            cursor: grabbing;
+            z-index: 100;
+            filter: brightness(1.2);
+        }
+
+        /* Enforce Absolute Centering */
+        .text-center-forced {
+            text-align: center !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="text-gray-100 font-sans selection:bg-accent-cyan selection:text-space-900">
+
+    <!-- Background Layers for Smooth Thematic Transitions -->
+    <div id="bg-color-layer" class="fixed inset-0 z-[-2] transition-colors duration-1000 ease-in-out bg-[#050510]"></div>
+    <div id="bg-effect-layer" class="fixed inset-0 z-[-1] bg-aurora opacity-40 mix-blend-screen pointer-events-none transition-opacity duration-1000"></div>
+
+    <!-- Initial Interaction Screen (Required for AudioContext) -->
+    <div id="start-screen">
+        <div class="star-field"></div>
+        <div class="z-10 text-center flex flex-col items-center max-w-2xl px-6">
+            <i class="fa-solid fa-graduation-cap text-4xl mb-6 text-gray-400"></i>
+            <h1 class="font-heading text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white">
+                STIT Ad-Da'wah
+            </h1>
+            <p class="text-gray-400 mb-12 tracking-widest uppercase text-sm">Interactive Orientation Module</p>
+            
+            <button id="btn-start" class="group relative px-8 py-4 bg-white text-black font-heading font-bold rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse hover:animate-none">
+                <span class="relative z-10 flex items-center gap-2">
+                    Mulai Pengalaman <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+                </span>
+                <div class="absolute inset-0 bg-gradient-to-r from-accent-cyan to-accent-blue opacity-0 group-hover:opacity-100 transition-opacity z-0"></div>
+                <div class="absolute inset-0 bg-white group-hover:opacity-0 transition-opacity z-0"></div>
+            </button>
+            
+            <p class="mt-8 text-xs text-gray-500"><i class="fa-solid fa-headphones mr-1"></i> Gunakan earphone untuk pengalaman maksimal</p>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <main id="app" class="relative w-full h-full hidden">
+        
+        <!-- Global Background Elements -->
+        <div class="star-field"></div>
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-cyan rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-pulse-glow z-0"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-purple rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-pulse-glow z-0" style="animation-delay: 2s;"></div>
+
+        <!-- UI HUD Overlay -->
+        <div class="absolute top-0 left-0 w-full p-4 md:p-6 flex justify-between items-start z-50 pointer-events-none">
+            <div class="flex flex-col gap-1 pointer-events-auto bg-black/30 md:bg-transparent p-2 md:p-0 rounded-lg backdrop-blur-sm md:backdrop-blur-none border border-white/5 md:border-transparent">
+                <span class="text-[10px] md:text-xs font-bold tracking-widest text-gray-400 uppercase">Literasi Digital 1</span>
+                <span class="font-heading font-bold text-xs md:text-sm bg-gradient-to-r from-accent-gold to-white text-gradient">Calon Pemimpin Peradaban</span>
+            </div>
+            
+            <div class="flex gap-2 pointer-events-auto">
+                <button id="btn-greenscreen" class="nav-btn w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg" title="Mode Green Screen (Untuk Video/OBS)">
+                    <i class="fa-solid fa-video text-sm text-gray-300 transition-colors"></i>
+                </button>
+                <button id="btn-audio" class="nav-btn w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-volume-high text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="absolute bottom-0 left-0 w-full h-1.5 md:h-2 bg-white/10 z-50">
+            <div id="progress-bar" class="h-full bg-gradient-to-r from-accent-cyan via-accent-blue to-accent-purple w-0 relative rounded-r-full shadow-[0_0_15px_rgba(0,240,255,0.5)]">
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-[0_0_10px_#fff]"></div>
+            </div>
+        </div>
+
+        <!-- Navigation Controls (Mobile & Desktop) -->
+        <div class="absolute bottom-6 md:top-1/2 md:-translate-y-1/2 left-4 md:left-6 z-50">
+            <button id="btn-prev" class="nav-btn w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-lg">
+                <i class="fa-solid fa-chevron-left text-sm md:text-base"></i>
+            </button>
+        </div>
+        <div class="absolute bottom-6 md:top-1/2 md:-translate-y-1/2 right-4 md:right-6 z-50">
+            <button id="btn-next" class="nav-btn w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg">
+                <i class="fa-solid fa-chevron-right text-sm md:text-base"></i>
+            </button>
+        </div>
+        
+        <!-- Scene Indicator -->
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 glass px-4 py-2 rounded-full pointer-events-none shadow-lg">
+            <span id="scene-counter" class="text-xs font-heading tracking-widest text-white">01 / 20</span>
+        </div>
+
+        <!-- SCENES CONTAINER -->
+        <div id="slides-container" class="relative w-full h-full">
+
+            <!-- Scene 1: Opening Universe -->
+            <section class="slide" id="scene-1">
+                <div class="text-center-forced w-full max-w-4xl z-10 mx-auto">
+                    <div class="hero-emoji animate-float mb-6 stagger-1">🌌</div>
+                    
+                    <!-- Trilingual Welcome Section -->
+                    <div class="glass-panel px-6 py-3 rounded-full mb-6 stagger-2 border-accent-gold/50 shadow-[0_0_20px_rgba(255,215,0,0.2)]">
+                        <h3 class="font-heading text-lg md:text-xl text-accent-gold font-bold tracking-wide flex items-center justify-center gap-3">
+                            <span dir="rtl" class="text-2xl mt-1">أهلاً بكم</span> 
+                            <span class="opacity-50 text-sm">•</span> 
+                            <span>Welcome</span> 
+                            <span class="opacity-50 text-sm">•</span> 
+                            <span>Selamat Datang</span>
+                        </h3>
+                    </div>
+
+                    <h2 class="font-heading text-xl md:text-3xl text-accent-cyan font-bold tracking-[0.2em] uppercase mb-4 stagger-2">Welcome To</h2>
+                    <h1 class="font-heading text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight stagger-3 glow-text text-white">
+                        DIGITAL<br>CIVILIZATION
+                    </h1>
+                    <p class="text-lg md:text-2xl text-gray-300 font-light stagger-4 max-w-2xl mx-auto">
+                        Ini bukan sekadar kuliah. Ini adalah gerbang menuju masa depan peradaban.
+                    </p>
+                    <div class="mt-8 animate-bounce stagger-4 opacity-70 flex flex-col items-center gap-2">
+                        <span class="text-[10px] md:text-xs tracking-widest uppercase text-accent-cyan bg-accent-cyan/10 px-4 py-1.5 rounded-full border border-accent-cyan/30 backdrop-blur-sm">Gunakan panah / usap untuk lanjut</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 2: Birth of Civilization -->
+            <section class="slide" id="scene-2">
+                <div class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="order-2 md:order-1 stagger-1 flex justify-center">
+                        <div class="relative w-64 h-64 md:w-96 md:h-96">
+                            <div class="absolute inset-0 bg-accent-gold rounded-full mix-blend-screen filter blur-3xl opacity-20"></div>
+                            <div class="hero-emoji absolute inset-0 flex items-center justify-center animate-spin-slow">🌍</div>
+                        </div>
+                    </div>
+                    <div class="order-1 md:order-2 z-10 text-left">
+                        <span class="text-accent-gold font-bold tracking-widest uppercase text-sm mb-2 block stagger-2">Fase 01</span>
+                        <h2 class="font-heading text-4xl md:text-6xl font-bold mb-6 stagger-2 leading-tight">Lahirnya<br>Peradaban.</h2>
+                        <p class="text-gray-300 text-lg md:text-xl mb-6 font-light stagger-3">
+                            Manusia diciptakan sebagai <span class="text-white font-semibold">Khalifah</span> di bumi. Sejak Nabi Adam diajarkan nama-nama benda, peradaban dimulai dari <b>Pengetahuan</b>.
+                        </p>
+                        <div class="glass-panel p-6 rounded-2xl stagger-4 border-l-4 border-accent-gold">
+                            <p class="font-heading italic text-lg text-gray-200">
+                                "Dan Dia mengajarkan kepada Adam nama-nama (benda-benda) seluruhnya..." <br>
+                                <span class="text-sm text-gray-400 not-italic mt-2 block">— QS. Al-Baqarah: 31</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 3: Writing Revolution -->
+            <section class="slide" id="scene-3">
+                <div class="text-center max-w-4xl z-10">
+                    <div class="hero-emoji mb-8 stagger-1">📜</div>
+                    <span class="text-accent-cyan font-bold tracking-widest uppercase text-sm mb-4 block stagger-2">Revolusi Ke-1</span>
+                    <h2 class="font-heading text-4xl md:text-6xl font-bold mb-6 stagger-2">Revolusi Tulisan</h2>
+                    <p class="text-gray-300 text-xl font-light stagger-3 mb-8">
+                        Pengetahuan mulai direkam. Dari dinding gua hingga papirus. Pikiran manusia melampaui batas ruang dan waktu.
+                    </p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-4 text-left">
+                        <div class="glass p-4 rounded-xl">
+                            <h4 class="text-gray-400 text-sm">Tahun</h4>
+                            <p class="text-xl font-bold font-heading">~3200 SM</p>
+                        </div>
+                        <div class="glass p-4 rounded-xl">
+                            <h4 class="text-gray-400 text-sm">Penemuan</h4>
+                            <p class="text-xl font-bold font-heading">Cuneiform</p>
+                        </div>
+                        <div class="glass p-4 rounded-xl col-span-2">
+                            <h4 class="text-gray-400 text-sm">Dampak</h4>
+                            <p class="text-md font-bold font-heading mt-1">Hukum & Sejarah Tercatat</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 4: Printing Revolution -->
+            <section class="slide" id="scene-4">
+                <div class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="z-10 text-left stagger-1">
+                        <span class="text-accent-blue font-bold tracking-widest uppercase text-sm mb-2 block">Revolusi Ke-2</span>
+                        <h2 class="font-heading text-4xl md:text-6xl font-bold mb-6">Mesin Cetak.</h2>
+                        <p class="text-gray-300 text-lg mb-6 font-light">
+                            Gutenberg mengubah dunia pada 1440. Buku bukan lagi barang mewah. Ilmu pengetahuan didemokratisasi. 
+                        </p>
+                        <p class="text-white text-xl font-medium mb-6">
+                            Di dunia Islam, perintah pertama bukanlah 'tulis', melainkan <span class="text-accent-cyan font-bold text-3xl mx-2 block md:inline mt-2">اقْرَأْ (Iqra)</span> - Bacalah.
+                        </p>
+                    </div>
+                    <div class="stagger-2 flex justify-center relative">
+                         <div class="hero-emoji animate-float">📚</div>
+                         <div class="absolute -bottom-10 -right-10 glass-panel p-4 rounded-xl rotate-6 animate-pulse">
+                            <i class="fa-solid fa-book-open text-accent-cyan text-3xl"></i>
+                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 5: Industrial Revolution -->
+            <section class="slide" id="scene-5">
+                <div class="text-center max-w-5xl z-10 w-full">
+                    <div class="hero-emoji mb-2 md:mb-4 stagger-1 text-5xl md:text-8xl">🏭</div>
+                    <h2 class="font-heading text-2xl md:text-4xl font-bold mb-4 md:mb-8 stagger-2">Revolusi Industri (1.0 - 3.0)</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 stagger-3 w-full">
+                        <div class="glass-panel p-4 md:p-6 rounded-2xl text-left border-t-2 border-orange-500 hover:-translate-y-1 transition-transform cursor-default">
+                            <i class="fa-solid fa-train text-2xl md:text-3xl text-orange-500 mb-3 md:mb-4"></i>
+                            <h3 class="font-bold text-lg md:text-xl mb-1 md:mb-2 text-white">1.0: Mekanisasi</h3>
+                            <p class="text-xs md:text-sm text-gray-300">Mesin uap menggantikan otot manusia dan hewan. Kapal uap & kereta api menghubungkan dunia.</p>
+                        </div>
+                        <div class="glass-panel p-4 md:p-6 rounded-2xl text-left border-t-2 border-yellow-500 hover:-translate-y-1 transition-transform cursor-default">
+                            <i class="fa-solid fa-bolt text-2xl md:text-3xl text-yellow-500 mb-3 md:mb-4"></i>
+                            <h3 class="font-bold text-lg md:text-xl mb-1 md:mb-2 text-white">2.0: Elektrifikasi</h3>
+                            <p class="text-xs md:text-sm text-gray-300">Listrik dan produksi massal (assembly line). Malam menjadi siang. Pabrik beroperasi 24 jam.</p>
+                        </div>
+                        <div class="glass-panel p-4 md:p-6 rounded-2xl text-left border-t-2 border-green-500 hover:-translate-y-1 transition-transform cursor-default">
+                            <i class="fa-solid fa-microchip text-2xl md:text-3xl text-green-500 mb-3 md:mb-4"></i>
+                            <h3 class="font-bold text-lg md:text-xl mb-1 md:mb-2 text-white">3.0: Otomatisasi</h3>
+                            <p class="text-xs md:text-sm text-gray-300">Komputer awal dan elektronik mengambil alih tugas repetitif. Lahirnya era digital awal.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 6: Computer Revolution -->
+            <section class="slide" id="scene-6">
+                <div class="w-full max-w-5xl z-10">
+                    <div class="flex flex-col md:flex-row items-center gap-12">
+                        <div class="w-full md:w-1/2 stagger-1 relative perspective-1000">
+                            <div class="glass-panel w-full aspect-video rounded-xl flex items-center justify-center bg-black/50 border-accent-cyan/30 shadow-[0_0_30px_rgba(0,240,255,0.1)] transform rotate-y-12">
+                                <span class="font-mono text-accent-cyan animate-pulse">C:\> Hello World_</span>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/2 text-left stagger-2">
+                            <span class="text-accent-cyan font-bold tracking-widest uppercase text-sm mb-2 block">Lompatan Kuantum</span>
+                            <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">Era Komputasi.</h2>
+                            <p class="text-gray-300 text-lg mb-4">
+                                Mesin kini bisa memproses logika. Dari ruangan sebesar lapangan basket (ENIAC) hingga pas di saku Anda.
+                            </p>
+                            <div class="flex items-center gap-4 mt-8 glass p-4 rounded-xl w-fit">
+                                <i class="fa-brands fa-apple text-3xl text-gray-300"></i>
+                                <i class="fa-brands fa-windows text-3xl text-blue-400"></i>
+                                <i class="fa-solid fa-mobile-screen-button text-3xl text-accent-cyan"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 7: Internet Revolution -->
+            <section class="slide" id="scene-7">
+                <div class="absolute inset-0 opacity-10 flex items-center justify-center overflow-hidden">
+                    <div class="w-[200vw] h-[200vw] border-[1px] border-accent-cyan rounded-full animate-spin-slow"></div>
+                    <div class="w-[150vw] h-[150vw] border-[1px] border-accent-blue rounded-full animate-spin-slow absolute" style="animation-direction: reverse;"></div>
+                </div>
+                <div class="text-center max-w-4xl z-10 relative">
+                    <div class="hero-emoji mb-4 stagger-1">🌐</div>
+                    <h2 class="font-heading text-5xl md:text-7xl font-bold mb-6 stagger-2 glow-text">Internet.</h2>
+                    <p class="text-2xl font-light text-white stagger-3">Dunia yang Terhubung Tanpa Batas Ruang.</p>
+                    <div class="mt-12 glass-panel p-8 rounded-3xl stagger-4 inline-block text-left">
+                        <p class="text-sm text-gray-400 uppercase tracking-widest mb-2">Fakta Hari Ini</p>
+                        <h3 class="text-4xl font-heading font-bold text-accent-cyan">5.35 Miliar</h3>
+                        <p class="text-lg text-gray-300">Pengguna Internet di Seluruh Dunia (66% populasi bumi).</p>
+                        <p class="text-xs text-gray-500 mt-4">*Data Global Digital Report</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 8: Social Media Revolution -->
+            <section class="slide" id="scene-8">
+                <div class="w-full max-w-6xl z-10 text-center">
+                    <h2 class="font-heading text-4xl md:text-5xl font-bold mb-12 stagger-1">Era Media Sosial</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 stagger-2">
+                        <!-- Stat Cards -->
+                        <div class="glass-panel p-6 rounded-2xl flex flex-col items-center justify-center aspect-square hover:-translate-y-2 transition-transform">
+                            <i class="fa-brands fa-facebook text-4xl text-blue-500 mb-4"></i>
+                            <span class="text-2xl font-bold">3.05M</span>
+                            <span class="text-xs text-gray-400">Pengguna Aktif</span>
+                        </div>
+                        <div class="glass-panel p-6 rounded-2xl flex flex-col items-center justify-center aspect-square hover:-translate-y-2 transition-transform">
+                            <i class="fa-brands fa-youtube text-4xl text-red-500 mb-4"></i>
+                            <span class="text-2xl font-bold">2.49M</span>
+                            <span class="text-xs text-gray-400">Pengguna Aktif</span>
+                        </div>
+                        <div class="glass-panel p-6 rounded-2xl flex flex-col items-center justify-center aspect-square hover:-translate-y-2 transition-transform">
+                            <i class="fa-brands fa-whatsapp text-4xl text-green-500 mb-4"></i>
+                            <span class="text-2xl font-bold">2.00M</span>
+                            <span class="text-xs text-gray-400">Pengguna Aktif</span>
+                        </div>
+                        <div class="glass-panel p-6 rounded-2xl flex flex-col items-center justify-center aspect-square hover:-translate-y-2 transition-transform">
+                            <i class="fa-brands fa-instagram text-4xl text-pink-500 mb-4"></i>
+                            <span class="text-2xl font-bold">2.00M</span>
+                            <span class="text-xs text-gray-400">Pengguna Aktif</span>
+                        </div>
+                    </div>
+                    <p class="text-xl mt-12 font-light text-gray-300 stagger-3">Setiap manusia kini adalah <b>kreator</b>, <b>penyiar</b>, dan <b>konsumen</b> informasi.</p>
+                </div>
+            </section>
+
+            <!-- Scene 9: AI Revolution -->
+            <section class="slide" id="scene-9">
+                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-accent-purple/20 via-black to-black opacity-50"></div>
+                <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center z-10">
+                    <div class="text-left stagger-1">
+                        <span class="text-accent-purple font-bold tracking-widest uppercase text-sm mb-2 block">Revolusi Terkini (4.0)</span>
+                        <h2 class="font-heading text-5xl md:text-7xl font-bold mb-4">A.I.</h2>
+                        <h3 class="text-2xl text-white mb-6">Kecerdasan Buatan</h3>
+                        <p class="text-gray-300 text-lg mb-6 font-light">
+                            Mesin kini bisa belajar, menganalisis, mencipta seni, dan menulis kode. Batas antara kecerdasan manusia dan mesin semakin tipis.
+                        </p>
+                        <div class="inline-block px-4 py-2 border border-accent-purple/50 rounded-full text-sm text-accent-purple bg-accent-purple/10">
+                            <i class="fa-solid fa-microchip mr-2"></i> Generative AI Era
+                        </div>
+                    </div>
+                    <div class="stagger-2 flex justify-center relative">
+                        <div class="w-64 h-64 md:w-80 md:h-80 relative">
+                            <!-- Brain visualization -->
+                            <div class="absolute inset-0 border-2 border-dashed border-accent-purple rounded-full animate-spin-slow"></div>
+                            <div class="absolute inset-4 border border-accent-cyan rounded-full animate-spin-slow" style="animation-direction: reverse; animation-duration: 15s;"></div>
+                            <div class="hero-emoji absolute inset-0 flex items-center justify-center animate-pulse">🧠</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 10: Who Are You? -->
+            <section class="slide" id="scene-10">
+                <div class="text-center max-w-3xl z-10">
+                    <h2 class="font-heading text-3xl md:text-5xl font-medium mb-12 stagger-1 text-gray-400">Di tengah pusaran miliaran data ini...</h2>
+                    <h1 class="font-heading text-5xl md:text-7xl font-bold mb-12 stagger-2 text-white">Siapakah <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-cyan to-accent-blue">ANDA?</span></h1>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 stagger-3 text-left">
+                        <div class="glass p-6 rounded-2xl hover:bg-white/10 hover:-translate-y-1 transition-all cursor-pointer group border border-transparent hover:border-white/20">
+                            <i class="fa-solid fa-users text-2xl text-gray-500 group-hover:text-accent-cyan transition-colors mb-4"></i>
+                            <h3 class="font-bold text-lg text-gray-300 group-hover:text-white transition-colors">Konsumen Pasif?</h3>
+                            <p class="text-sm text-gray-500 mt-2 group-hover:text-gray-300 transition-colors">Hanya menelan algoritma.</p>
+                        </div>
+                        <div class="glass p-6 rounded-2xl hover:bg-white/10 hover:-translate-y-1 transition-all cursor-pointer group border border-transparent hover:border-white/20">
+                            <i class="fa-solid fa-bullhorn text-2xl text-gray-500 group-hover:text-accent-cyan transition-colors mb-4"></i>
+                            <h3 class="font-bold text-lg text-gray-300 group-hover:text-white transition-colors">Kreator Bising?</h3>
+                            <p class="text-sm text-gray-500 mt-2 group-hover:text-gray-300 transition-colors">Mengejar viral tanpa nilai.</p>
+                        </div>
+                        <div class="glass-panel p-6 rounded-2xl border-accent-gold cursor-pointer transform scale-105 shadow-[0_0_30px_rgba(255,215,0,0.2)] hover:shadow-[0_0_40px_rgba(255,215,0,0.4)] transition-all">
+                            <i class="fa-solid fa-lightbulb text-2xl text-accent-gold mb-4 animate-pulse"></i>
+                            <h3 class="font-bold text-lg text-white">Pemimpin Peradaban?</h3>
+                            <p class="text-sm text-gray-300 mt-2">Membawa cahaya literasi.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 11: Digital Crisis -->
+            <section class="slide" id="scene-11">
+                <div class="absolute inset-0 bg-red-900/20 mix-blend-multiply"></div>
+                <div class="w-full max-w-5xl text-left z-10">
+                    <div class="hero-emoji mb-4 md:mb-6 stagger-1 text-red-500 filter drop-shadow-[0_0_20px_rgba(255,0,0,0.5)] text-5xl md:text-8xl">⚠️</div>
+                    <h2 class="font-heading text-3xl md:text-6xl font-bold mb-4 md:mb-8 stagger-2 text-red-400">Krisis Digital.</h2>
+                    <p class="text-lg md:text-2xl font-light text-gray-300 mb-8 md:mb-12 stagger-3 border-l-4 border-red-500 pl-4 md:pl-6">
+                        Teknologi berlari lebih cepat daripada <span class="text-white font-bold">Adab</span> manusia.
+                    </p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 stagger-4">
+                        <div class="glass bg-red-950/30 p-4 rounded-xl border border-red-500/30 text-center hover:bg-red-900/50 transition-colors">
+                            <span class="block text-2xl md:text-3xl font-bold text-white mb-1">Hoax</span>
+                            <span class="text-[10px] md:text-xs text-red-300 uppercase">Informasi Palsu</span>
+                        </div>
+                        <div class="glass bg-red-950/30 p-4 rounded-xl border border-red-500/30 text-center hover:bg-red-900/50 transition-colors">
+                            <span class="block text-2xl md:text-3xl font-bold text-white mb-1">FOMO</span>
+                            <span class="text-[10px] md:text-xs text-red-300 uppercase">Kesehatan Mental</span>
+                        </div>
+                        <div class="glass bg-red-950/30 p-4 rounded-xl border border-red-500/30 text-center hover:bg-red-900/50 transition-colors">
+                            <span class="block text-2xl md:text-3xl font-bold text-white mb-1">Scam</span>
+                            <span class="text-[10px] md:text-xs text-red-300 uppercase">Kejahatan Siber</span>
+                        </div>
+                        <div class="glass bg-red-950/30 p-4 rounded-xl border border-red-500/30 text-center hover:bg-red-900/50 transition-colors">
+                            <span class="block text-2xl md:text-3xl font-bold text-white mb-1">Echo</span>
+                            <span class="text-[10px] md:text-xs text-red-300 uppercase">Polarisasi Sosmed</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 11: Digital Crisis -->
+            <section class="slide" id="scene-11">
+                <div class="absolute inset-0 bg-red-900/20 mix-blend-multiply"></div>
+                <div class="w-full max-w-5xl text-left z-10">
+                    <div class="hero-emoji mb-6 stagger-1 text-red-500 filter drop-shadow-[0_0_20px_rgba(255,0,0,0.5)]">⚠️</div>
+                    <h2 class="font-heading text-4xl md:text-6xl font-bold mb-8 stagger-2 text-red-400">Krisis Digital.</h2>
+                    <p class="text-2xl font-light text-gray-300 mb-12 stagger-3 border-l-4 border-red-500 pl-6">
+                        Teknologi berlari lebih cepat daripada <span class="text-white font-bold">Adab</span> manusia.
+                    </p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-4">
+                        <div class="glass bg-red-950/30 p-4 rounded-xl border border-red-500/30 text-center">
+                            <span class="block text-3xl font-bold text-white mb-1">Hoax</span>
+                            <span class="text-xs text-red-300 uppercase">Informasi Palsu</span>
+                        </div>
+                        <div class="glass bg-red-950/30 p-4 rounded-xl border border-red-500/30 text-center">
+                            <span class="block text-3xl font-bold text-white mb-1">FOMO</span>
+                            <span class="text-xs text-red-300 uppercase">Kesehatan Mental</span>
+                        </div>
+                        <div class="glass bg-red-950/30 p-4 rounded-xl border border-red-500/30 text-center">
+                            <span class="block text-3xl font-bold text-white mb-1">Scam</span>
+                            <span class="text-xs text-red-300 uppercase">Kejahatan Siber</span>
+                        </div>
+                        <div class="glass bg-red-950/30 p-4 rounded-xl border border-red-500/30 text-center">
+                            <span class="block text-3xl font-bold text-white mb-1">Echo</span>
+                            <span class="text-xs text-red-300 uppercase">Polarisasi Sosmed</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 12: Truth vs Hoax (Tabayyun) -->
+            <section class="slide" id="scene-12">
+                <div class="w-full max-w-6xl flex flex-col md:flex-row gap-8 z-10 h-[60vh]">
+                    <!-- The Noise -->
+                    <div class="flex-1 glass-panel p-8 rounded-3xl flex flex-col justify-center relative overflow-hidden stagger-1 group">
+                        <div class="absolute inset-0 bg-red-500/5 group-hover:bg-red-500/10 transition-colors"></div>
+                        <i class="fa-solid fa-tower-broadcast text-4xl text-gray-500 mb-6 relative z-10"></i>
+                        <h3 class="text-3xl font-bold text-gray-300 mb-4 relative z-10">Banjir Informasi</h3>
+                        <p class="text-gray-400 relative z-10">Ribuan notifikasi, share tanpa baca, clickbait, manipulasi emosi algoritma.</p>
+                    </div>
+                    
+                    <!-- The Filter -->
+                    <div class="flex-none flex items-center justify-center stagger-2">
+                        <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                            <i class="fa-solid fa-arrow-right-arrow-left text-xl text-gray-400 rotate-90 md:rotate-0"></i>
+                        </div>
+                    </div>
+
+                    <!-- The Truth -->
+                    <div class="flex-1 glass-panel border-accent-emerald p-8 rounded-3xl flex flex-col justify-center relative overflow-hidden stagger-3 group shadow-[0_0_30px_rgba(0,255,136,0.1)]">
+                        <div class="absolute inset-0 bg-accent-emerald/5 group-hover:bg-accent-emerald/10 transition-colors"></div>
+                        <i class="fa-solid fa-shield-halved text-4xl text-accent-emerald mb-6 relative z-10"></i>
+                        <h3 class="text-3xl font-bold text-white mb-4 relative z-10">T A B A Y Y U N</h3>
+                        <p class="text-gray-300 relative z-10 font-light">"Hai orang-orang yang beriman, jika datang kepadamu orang fasik membawa suatu berita, maka periksalah dengan teliti..." (QS 49:6)</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 13: Digital Ethics -->
+            <section class="slide" id="scene-13">
+                <div class="text-center max-w-4xl z-10">
+                    <h2 class="font-heading text-4xl font-bold mb-12 stagger-1">Etika di Dunia Maya</h2>
+                    <div class="space-y-6 stagger-2 text-left">
+                        
+                        <div class="glass-panel p-6 rounded-2xl flex items-center gap-6 transform hover:scale-105 transition-transform cursor-default">
+                            <div class="w-16 h-16 rounded-full bg-blue-900/50 flex items-center justify-center flex-shrink-0 text-2xl">🗣️</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Jejak Digital adalah Amal</h3>
+                                <p class="text-gray-400 text-sm mt-1">Setiap klik, like, dan komen dicatat. Baik oleh server, maupun oleh Malaikat Raqib dan Atid.</p>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-6 rounded-2xl flex items-center gap-6 transform hover:scale-105 transition-transform cursor-default">
+                            <div class="w-16 h-16 rounded-full bg-emerald-900/50 flex items-center justify-center flex-shrink-0 text-2xl">🔒</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Menjaga Privasi & Aib</h3>
+                                <p class="text-gray-400 text-sm mt-1">Tidak semua hal harus diunggah. Menutup aib saudara di dunia, Allah tutup aibnya di akhirat.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-panel p-6 rounded-2xl flex items-center gap-6 transform hover:scale-105 transition-transform cursor-default">
+                            <div class="w-16 h-16 rounded-full bg-purple-900/50 flex items-center justify-center flex-shrink-0 text-2xl">⚖️</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Kritis Berpikir</h3>
+                                <p class="text-gray-400 text-sm mt-1">Gunakan akal sehat (Ulul Albab) sebelum membagikan informasi. Jangan menjadi agen penyebar kepanikan.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 14: Islamic Civilization -->
+            <section class="slide" id="scene-14">
+                <div class="w-full max-w-5xl text-center z-10">
+                    <div class="hero-emoji mb-8 stagger-1 filter sepia hue-rotate-30">🏛️</div>
+                    <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6 stagger-2 text-accent-gold">Islam Membangun Peradaban,<br>Bukan Sekadar Mengikutinya.</h2>
+                    <p class="text-xl text-gray-300 font-light stagger-3 mb-12 max-w-3xl mx-auto">
+                        Sejarah membuktikan, ketika iman berpadu dengan ilmu, umat Islam memimpin dunia.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Scene 15: Golden Age -->
+            <section class="slide" id="scene-15">
+                <!-- Islamic geometric pattern background (CSS approximation) -->
+                <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, #ffd700 25%, transparent 25%, transparent 75%, #ffd700 75%, #ffd700), repeating-linear-gradient(45deg, #ffd700 25%, #000 25%, #000 75%, #ffd700 75%, #ffd700); background-position: 0 0, 10px 10px; background-size: 20px 20px;"></div>
+                
+                <div class="w-full max-w-6xl z-10">
+                    <h2 class="font-heading text-3xl text-accent-gold text-center mb-12 stagger-1 tracking-widest uppercase">The Golden Age</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-2">
+                        <div class="glass-panel border-accent-gold/30 p-8 rounded-t-full pt-16 text-center hover:bg-accent-gold/10 transition-colors">
+                            <h3 class="text-2xl font-bold text-white mb-2">Al-Khwarizmi</h3>
+                            <p class="text-accent-gold text-sm mb-4">Bapak Aljabar</p>
+                            <p class="text-gray-400 text-sm">Algoritma (dari namanya) adalah dasar dari semua program komputer, AI, dan aplikasi digital hari ini.</p>
+                        </div>
+                        <div class="glass-panel border-accent-gold/30 p-8 rounded-t-full pt-16 text-center hover:bg-accent-gold/10 transition-colors mt-8 md:mt-0">
+                            <h3 class="text-2xl font-bold text-white mb-2">Al-Jazari</h3>
+                            <p class="text-accent-gold text-sm mb-4">Bapak Robotika</p>
+                            <p class="text-gray-400 text-sm">Merancang mesin otomatis dan robot awal ratusan tahun sebelum revolusi industri Eropa.</p>
+                        </div>
+                        <div class="glass-panel border-accent-gold/30 p-8 rounded-t-full pt-16 text-center hover:bg-accent-gold/10 transition-colors mt-8 md:mt-0">
+                            <h3 class="text-2xl font-bold text-white mb-2">Fatima al-Fihri</h3>
+                            <p class="text-accent-gold text-sm mb-4">Pendiri Universitas</p>
+                            <p class="text-gray-400 text-sm">Mendirikan Al-Qarawiyyin, institusi pendidikan tinggi pertama di dunia. Cikal bakal kampus modern.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 16: Future Classroom -->
+            <section class="slide" id="scene-16">
+                <div class="absolute inset-0 bg-gradient-to-b from-space-900 to-accent-blue/20"></div>
+                <div class="w-full max-w-5xl flex flex-col md:flex-row items-center gap-12 z-10">
+                     <div class="w-full md:w-1/2 stagger-1">
+                        <div class="relative w-full aspect-square max-w-md mx-auto">
+                            <!-- Abstract holographic projection visualization -->
+                            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-8 bg-accent-cyan rounded-full mix-blend-screen filter blur-xl opacity-50"></div>
+                            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full shadow-[0_0_20px_#00f0ff]"></div>
+                            <div class="absolute top-10 left-0 right-0 h-64 border-t-2 border-l-2 border-r-2 border-accent-cyan/30 rounded-t-[100px] bg-gradient-to-t from-accent-cyan/10 to-transparent flex flex-col items-center pt-8 overflow-hidden">
+                                <i class="fa-solid fa-graduation-cap text-5xl text-accent-cyan animate-float opacity-80"></i>
+                                <div class="w-full h-px bg-accent-cyan/50 mt-8 animate-pulse"></div>
+                                <div class="w-full h-px bg-accent-cyan/30 mt-4 animate-pulse" style="animation-delay: 0.5s"></div>
+                                <div class="w-full h-px bg-accent-cyan/10 mt-4 animate-pulse" style="animation-delay: 1s"></div>
+                            </div>
+                        </div>
+                     </div>
+                     <div class="w-full md:w-1/2 text-left stagger-2">
+                        <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">Ruang Kelas Masa Depan</h2>
+                        <p class="text-gray-300 text-lg mb-6">
+                            Papan tulis digantikan hologram. Buku teks menjadi simulasi VR interaktif. AI menjadi asisten pribadi siswa.
+                        </p>
+                        <p class="text-white font-medium text-xl">
+                            Jika AI bisa menjelaskan segalanya... <br>
+                            <span class="text-accent-cyan">Lalu apa peran Anda sebagai Guru?</span>
+                        </p>
+                     </div>
+                </div>
+            </section>
+
+            <!-- Scene 17: Teacher 2045 -->
+            <section class="slide" id="scene-17">
+                <div class="text-center max-w-4xl z-10">
+                    <div class="hero-emoji mb-8 stagger-1">👨‍🏫</div>
+                    <h2 class="font-heading text-4xl font-bold mb-8 stagger-2">Peran Guru yang Tak Tergantikan Mesin</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 stagger-3 text-left">
+                        <div class="glass p-6 rounded-xl border-l-4 border-accent-emerald">
+                            <h3 class="font-bold text-white text-lg mb-2">Mentransfer Adab</h3>
+                            <p class="text-gray-400 text-sm">Mesin punya data, manusia punya adab. AI tidak bisa mengajarkan empati dan ketulusan hati.</p>
+                        </div>
+                        <div class="glass p-6 rounded-xl border-l-4 border-accent-emerald">
+                            <h3 class="font-bold text-white text-lg mb-2">Membangkitkan Jiwa</h3>
+                            <p class="text-gray-400 text-sm">Menyentuh hati, memotivasi, dan mendoakan murid. Hal yang mustahil dilakukan algoritma.</p>
+                        </div>
+                        <div class="glass p-6 rounded-xl border-l-4 border-accent-emerald">
+                            <h3 class="font-bold text-white text-lg mb-2">Kurator Kebenaran</h3>
+                            <p class="text-gray-400 text-sm">Membimbing siswa membedakan mana kebenaran, mana halusinasi digital, dan mana manipulasi.</p>
+                        </div>
+                        <div class="glass p-6 rounded-xl border-l-4 border-accent-emerald">
+                            <h3 class="font-bold text-white text-lg mb-2">Teladan (Uswah)</h3>
+                            <p class="text-gray-400 text-sm">Menjadi contoh nyata bagaimana seorang muslim berinteraksi dengan ilmu dan masyarakat.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene 18: Mission -->
+            <section class="slide" id="scene-18">
+                <div class="w-full max-w-4xl text-center z-10">
+                    <span class="inline-block px-4 py-1 rounded-full bg-white/10 text-xs font-bold tracking-widest uppercase mb-8 stagger-1 border border-white/20">Visi STIT Ad-Da'wah</span>
+                    <h2 class="font-heading text-3xl md:text-5xl font-bold leading-tight mb-8 stagger-2">
+                        "Mencetak Guru & Da'i Digital <br> yang <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-gold to-yellow-200">Mencerahkan Peradaban.</span>"
+                    </h2>
+                    <p class="text-xl text-gray-300 font-light stagger-3 mb-12">
+                        Anda di sini bukan sekadar mengejar gelar sarjana. Anda sedang ditempa untuk memimpin peradaban Islam di era digital.
+                    </p>
+                    <div class="w-24 h-1 bg-gradient-to-r from-transparent via-white to-transparent mx-auto stagger-4 opacity-50"></div>
+                </div>
+            </section>
+
+            <!-- Scene 19: Reflection -->
+            <section class="slide" id="scene-19">
+                <div class="absolute inset-0 bg-black z-0"></div> <!-- Pure black for reflection -->
+                <div class="w-full max-w-3xl text-center z-10">
+                    <i class="fa-solid fa-quote-left text-4xl text-gray-600 mb-6 stagger-1"></i>
+                    <p class="font-heading text-2xl md:text-4xl font-light italic text-gray-200 leading-relaxed mb-8 stagger-2">
+                        "Al-adabu fawqal 'ilmi."
+                    </p>
+                    <p class="text-xl text-gray-400 stagger-3">
+                        Adab itu di atas ilmu. Di era di mana ilmu (informasi) bisa didapat dalam hitungan detik, Adab-lah yang membedakan manusia yang mulia dengan mesin pencari.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Scene 20: Call To Action -->
+            <section class="slide" id="scene-20">
+                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-accent-blue/30 via-space-900 to-space-900 z-0"></div>
+                
+                <div class="text-center max-w-4xl z-10 flex flex-col items-center">
+                    <div class="hero-emoji animate-pulse-glow mb-6 stagger-1">🚀</div>
+                    <h2 class="font-heading text-5xl md:text-7xl font-bold mb-4 stagger-2 text-white">Siap Menerima Misi?</h2>
+                    <p class="text-xl text-gray-300 font-light mb-12 stagger-3">
+                        Selamat datang di Semester 1. <br> Selamat datang di medan juang peradaban.
+                    </p>
+                    
+                    <button id="btn-finish" class="stagger-4 group relative px-10 py-5 bg-transparent border-2 border-accent-cyan text-accent-cyan font-heading font-bold text-xl rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:shadow-[0_0_40px_rgba(0,240,255,0.6)]">
+                        <span class="relative z-10 flex items-center gap-3">
+                            <i class="fa-solid fa-check-circle"></i> Saya Siap Berjuang
+                        </span>
+                        <div class="absolute inset-0 bg-accent-cyan opacity-0 group-hover:opacity-20 transition-opacity z-0"></div>
+                    </button>
+                    
+                    <p class="mt-8 text-sm text-gray-500 stagger-4 font-light">STIT Ad-Da'wah • Literasi Digital 1</p>
+                </div>
+            </section>
+
+        </div> <!-- End Slides Container -->
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- State ---
+            let currentSlide = 0;
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let audioContextStarted = false;
+            let isMuted = false;
+            
+            // --- UI Elements ---
+            const app = document.getElementById('app');
+            const startScreen = document.getElementById('start-screen');
+            const btnStart = document.getElementById('btn-start');
+            const btnNext = document.getElementById('btn-next');
+            const btnPrev = document.getElementById('btn-prev');
+            const btnAudio = document.getElementById('btn-audio');
+            const btnGreenScreen = document.getElementById('btn-greenscreen');
+            const btnFinish = document.getElementById('btn-finish');
+            const progressBar = document.getElementById('progress-bar');
+            const sceneCounter = document.getElementById('scene-counter');
+            const bgColorLayer = document.getElementById('bg-color-layer');
+            
+            // --- State & Themes ---
+            let isGreenScreen = false;
+            
+            // Smooth background colors matched strictly to each scene's theme
+            const sceneColors = [
+                '#050510', // 1: Universe (Dark Space)
+                '#0a0a20', // 2: Birth of Civilization
+                '#1a150a', // 3: Writing (Sepia/Parchment)
+                '#1a150a', // 4: Printing 
+                '#1c0a00', // 5: Industrial (Dark Rust/Orange)
+                '#001122', // 6: Computer (Deep Blue)
+                '#001122', // 7: Internet
+                '#050a1f', // 8: Social Media
+                '#1a0022', // 9: AI (Deep Purple)
+                '#050505', // 10: Who are you (Pitch Dark)
+                '#220000', // 11: Crisis (Dark Red/Warning)
+                '#220000', // 11(dup): Crisis
+                '#001a11', // 12: Truth/Tabayyun (Emerald)
+                '#021c13', // 13: Digital Ethics
+                '#1a1800', // 14: Islamic Civilization (Gold)
+                '#1a1800', // 15: Golden Age
+                '#001122', // 16: Future Classroom
+                '#001122', // 17: Teacher 2045
+                '#050510', // 18: Mission
+                '#000000', // 19: Reflection
+                '#050510'  // 20: CTA
+            ];
+            
+            // --- Audio Setup (Tone.js) ---
+            let ambientDrone, clickSynth, successSynth, nextSynth, dragSynth;
+
+            async function initAudio() {
+                if (audioContextStarted) return;
+                
+                await Tone.start();
+                audioContextStarted = true;
+
+                // Ambient Space Drone
+                ambientDrone = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 2, decay: 1, sustain: 1, release: 4 }
+                }).toDestination();
+                ambientDrone.volume.value = -20; // Very soft
+
+                // UI Click Synth
+                clickSynth = new Tone.MembraneSynth({
+                    pitchDecay: 0.05,
+                    octaves: 2,
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.01, decay: 0.4, sustain: 0.01, release: 1 }
+                }).toDestination();
+                clickSynth.volume.value = -10;
+
+                // Success Synth (For CTA)
+                successSynth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.1, decay: 0.2, sustain: 0.5, release: 2 }
+                }).toDestination();
+                successSynth.volume.value = -15;
+
+                // Next Slide Synth (Whoosh / Tech Transition effect)
+                nextSynth = new Tone.FMSynth({
+                    modulationIndex: 8,
+                    envelope: { attack: 0.02, decay: 0.3, sustain: 0, release: 0.4 },
+                    modulation: { type: "triangle" },
+                    modulationEnvelope: { attack: 0.02, decay: 0.2, sustain: 1, release: 0.2 }
+                }).toDestination();
+                nextSynth.volume.value = -18;
+
+                // Drag Interaction Synth
+                dragSynth = new Tone.MembraneSynth().toDestination();
+                dragSynth.volume.value = -25;
+
+                // Start ambient drone (Cm9 chord open voicing)
+                ambientDrone.triggerAttack(["C2", "G2", "Eb3", "D4"]);
+            }
+
+            function playClick() {
+                if (audioContextStarted && !isMuted && clickSynth) {
+                    clickSynth.triggerAttackRelease("C2", "8n");
+                }
+            }
+            
+            function playNextSound() {
+                if (audioContextStarted && !isMuted && nextSynth) {
+                    nextSynth.triggerAttackRelease("E4", "16n");
+                }
+            }
+            
+            function playDragSound() {
+                if (audioContextStarted && !isMuted && dragSynth) {
+                    dragSynth.triggerAttackRelease("C4", "32n");
+                }
+            }
+
+            function toggleAudio() {
+                isMuted = !isMuted;
+                Tone.Destination.mute = isMuted;
+                
+                const icon = btnAudio.querySelector('i');
+                if (isMuted) {
+                    icon.className = 'fa-solid fa-volume-xmark text-gray-500';
+                    btnAudio.classList.add('bg-white/5');
+                    btnAudio.classList.remove('bg-white/20');
+                } else {
+                    icon.className = 'fa-solid fa-volume-high text-white';
+                    btnAudio.classList.remove('bg-white/5');
+                    btnAudio.classList.add('bg-white/20');
+                }
+            }
+
+            // --- Navigation Logic ---
+            function updateUI() {
+                // Update Progress
+                const progress = ((currentSlide) / (totalSlides - 1)) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Update Counter
+                sceneCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${totalSlides}`;
+
+                // Update Buttons
+                if(btnPrev) btnPrev.disabled = currentSlide === 0;
+                if(btnNext) {
+                    if (currentSlide === totalSlides - 1) {
+                        btnNext.style.display = 'none';
+                    } else {
+                        btnNext.style.display = 'flex';
+                    }
+                }
+            }
+
+            function goToSlide(index) {
+                if (index < 0 || index >= totalSlides) return;
+                
+                // Remove active class from all
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                    if (i < index) {
+                        slide.classList.add('prev');
+                    } else {
+                        slide.classList.remove('prev');
+                    }
+                });
+                
+                // Add active class to target
+                currentSlide = index;
+                slides[currentSlide].classList.add('active');
+                
+                // Update dynamic thematic background gracefully
+                if(bgColorLayer && sceneColors[currentSlide]) {
+                    bgColorLayer.style.backgroundColor = sceneColors[currentSlide];
+                }
+                
+                playNextSound();
+                updateUI();
+            }
+
+            function nextSlide() { goToSlide(currentSlide + 1); }
+            function prevSlide() { goToSlide(currentSlide - 1); }
+
+            // --- Draggable Elements System (For Green Screen/Custom Layout) ---
+            
+            // 1. Dynamically assign .draggable to key visual and text elements across all scenes
+            const draggableTargets = document.querySelectorAll('.hero-emoji, h1, h2, h3, p, .glass, .glass-panel');
+            draggableTargets.forEach(el => {
+                // Ignore UI controls, start screen, and non-visual text
+                if(!el.closest('.nav-btn') && !el.closest('#start-screen') && !el.closest('#progress-bar') && !el.classList.contains('text-xs')) {
+                    el.classList.add('draggable');
+                    // Store initial inline positions
+                    el.style.left = '0px';
+                    el.style.top = '0px';
+                }
+            });
+
+            // 2. Drag Logic Variables
+            let activeDragElement = null;
+            let currentX = 0, currentY = 0, initialX = 0, initialY = 0;
+
+            // 3. Event Listeners for dragging
+            document.addEventListener('mousedown', dragStart, false);
+            document.addEventListener('touchstart', dragStart, {passive: false});
+            document.addEventListener('mousemove', drag, false);
+            document.addEventListener('touchmove', drag, {passive: false});
+            document.addEventListener('mouseup', dragEnd, false);
+            document.addEventListener('touchend', dragEnd, false);
+
+            function dragStart(e) {
+                if (e.target.closest('.draggable')) {
+                    activeDragElement = e.target.closest('.draggable');
+                    
+                    if (e.type === "touchstart") {
+                        initialX = e.touches[0].clientX - parseFloat(activeDragElement.style.left || 0);
+                        initialY = e.touches[0].clientY - parseFloat(activeDragElement.style.top || 0);
+                    } else {
+                        initialX = e.clientX - parseFloat(activeDragElement.style.left || 0);
+                        initialY = e.clientY - parseFloat(activeDragElement.style.top || 0);
+                    }
+                    playDragSound();
+                }
+            }
+
+            function drag(e) {
+                if (activeDragElement) {
+                    e.preventDefault(); // Prevent page scrolling while moving the object
+                    
+                    if (e.type === "touchmove") {
+                        currentX = e.touches[0].clientX - initialX;
+                        currentY = e.touches[0].clientY - initialY;
+                    } else {
+                        currentX = e.clientX - initialX;
+                        currentY = e.clientY - initialY;
+                    }
+
+                    // Use relative positioning left/top to avoid transform conflicts with staggered CSS animations
+                    activeDragElement.style.left = `${currentX}px`;
+                    activeDragElement.style.top = `${currentY}px`;
+                }
+            }
+
+            function dragEnd(e) {
+                if (activeDragElement) {
+                    playDragSound();
+                    activeDragElement = null;
+                }
+            }
+
+            // --- Event Listeners ---
+            
+            // Start Experience
+            btnStart.addEventListener('click', async () => {
+                await initAudio();
+                
+                startScreen.style.opacity = '0';
+                setTimeout(() => {
+                    startScreen.style.display = 'none';
+                    app.classList.remove('hidden');
+                    goToSlide(0); // Trigger first slide animations
+                }, 1000);
+            });
+
+            // Button Controls
+            if(btnNext) btnNext.addEventListener('click', nextSlide);
+            if(btnPrev) btnPrev.addEventListener('click', prevSlide);
+            btnAudio.addEventListener('click', toggleAudio);
+            
+            // Green Screen Toggle Engine
+            btnGreenScreen.addEventListener('click', () => {
+                isGreenScreen = !isGreenScreen;
+                document.body.classList.toggle('gs-active', isGreenScreen);
+                
+                const icon = btnGreenScreen.querySelector('i');
+                if (isGreenScreen) {
+                    icon.classList.remove('text-gray-300', 'fa-video');
+                    icon.classList.add('text-accent-emerald', 'fa-video-slash', 'animate-pulse');
+                    btnGreenScreen.classList.add('border', 'border-accent-emerald');
+                } else {
+                    icon.classList.add('text-gray-300', 'fa-video');
+                    icon.classList.remove('text-accent-emerald', 'fa-video-slash', 'animate-pulse');
+                    btnGreenScreen.classList.remove('border', 'border-accent-emerald');
+                }
+                playClick();
+            });
+            
+            btnFinish.addEventListener('click', () => {
+                if(audioContextStarted && !isMuted) {
+                    // Play majestic chord
+                    successSynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "2n");
+                }
+                btnFinish.innerHTML = '<span class="relative z-10 flex items-center gap-3"><i class="fa-solid fa-spinner fa-spin"></i> Memproses Visi...</span>';
+                
+                setTimeout(() => {
+                    btnFinish.innerHTML = '<span class="relative z-10 flex items-center gap-3 text-white"><i class="fa-solid fa-check"></i> Selamat Datang, Pemimpin!</span>';
+                    btnFinish.classList.remove('border-accent-cyan', 'text-accent-cyan');
+                    btnFinish.classList.add('bg-accent-cyan', 'text-space-900');
+                    
+                    // Optional: Fade out ambient after finish
+                    if(ambientDrone) {
+                        ambientDrone.triggerRelease(["C2", "G2", "Eb3", "D4"], "+0.5");
+                    }
+                }, 1500);
+            });
+
+            // Keyboard Navigation
+            document.addEventListener('keydown', (e) => {
+                if (startScreen.style.display !== 'none') {
+                    if(e.key === 'Enter' || e.key === ' ') btnStart.click();
+                    return;
+                }
+                
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    prevSlide();
+                }
+            });
+
+            // Touch Swipe Navigation
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            app.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, {passive: true});
+
+            app.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, {passive: true});
+
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                if (touchEndX < touchStartX - swipeThreshold) {
+                    nextSlide(); // Swipe left -> Next
+                }
+                if (touchEndX > touchStartX + swipeThreshold) {
+                    prevSlide(); // Swipe right -> Prev
+                }
+            }
+        });
+    </script>
+</body>
+</html>
